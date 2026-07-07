@@ -58,19 +58,30 @@ Respond in simple, easy-to-understand language.`;
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({
-          model_id: process.env.IBM_MODEL_ID,
-          input: prompt,
-          parameters: {
-            max_new_tokens: 800,
-            temperature: 0.7
-          },
-        })
+       body: JSON.stringify({
+  model_id: process.env.IBM_MODEL_ID,
+  messages: [
+    {
+      role: "system",
+      content: "You are an AI Job Mentor for informal workers in India. Respond in simple easy language."
+    },
+    {
+      role: "user",
+      content: prompt
+    }
+  ],
+  parameters: {
+    max_new_tokens: 800,
+    temperature: 0.7
+  },
+  project_id: process.env.IBM_PROJECT_ID
+})
       }
     );
 
     const data = await response.json();
-    const text = data.results?.[0]?.generated_text || 
+    console.log('IBM Response:', JSON.stringify(data));
+    const text = data.choices?.[0]?.message?.content || 
                  'Sorry, could not generate guidance.';
     
     res.json({ guidance: text });
