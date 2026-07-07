@@ -1,0 +1,436 @@
+
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>AI Job Mentor</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --blue:       #0f62fe;
+    --blue-dark:  #0043ce;
+    --blue-light: #d0e2ff;
+    --blue-mid:   #4589ff;
+    --purple:     #7c5cd8;
+    --bg:         #f4f4f4;
+    --surface:    #ffffff;
+    --border:     #e0e0e0;
+    --text:       #161616;
+    --muted:      #6f6f6f;
+    --green:      #198038;
+    --green-bg:   #defbe6;
+    --orange:     #b45309;
+    --orange-bg:  #fef3c7;
+    --radius:     8px;
+  }
+
+  body {
+    font-family: -apple-system, "Segoe UI", "IBM Plex Sans", system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    font-size: 15px;
+  }
+
+  /* ── HEADER ── */
+  header {
+    background: linear-gradient(135deg, #0043ce 0%, #0f62fe 60%, #4589ff 100%);
+    color: #fff;
+    padding: 0 24px;
+  }
+  .header-inner {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 28px 0 32px;
+  }
+  .logo-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 6px;
+  }
+  .logo-icon {
+    width: 44px; height: 44px;
+    background: rgba(255,255,255,0.18);
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .logo-icon svg { width: 26px; height: 26px; }
+  .logo-text { font-size: 26px; font-weight: 700; letter-spacing: -0.3px; }
+  .logo-text span { opacity: 0.75; font-weight: 400; }
+  .header-tagline {
+    font-size: 14px;
+    opacity: 0.82;
+    padding-left: 56px;
+    letter-spacing: 0.01em;
+  }
+
+  /* ── MAIN LAYOUT ── */
+  main {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 32px 16px 48px;
+  }
+
+  /* ── FORM CARD ── */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 28px 28px;
+    margin-bottom: 24px;
+  }
+  .card-title {
+    font-size: 16px;
+    font-weight: 700;
+    margin-bottom: 18px;
+    color: var(--text);
+    display: flex; align-items: center; gap: 8px;
+  }
+  .card-title .dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--blue);
+    flex-shrink: 0;
+  }
+
+  .form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+  .form-group { display: flex; flex-direction: column; gap: 5px; }
+  .form-group.full { grid-column: 1 / -1; }
+  label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+  input, select, textarea {
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 9px 12px;
+    font-size: 14px;
+    font-family: inherit;
+    color: var(--text);
+    background: #fafafa;
+    transition: border-color 0.18s, box-shadow 0.18s;
+    width: 100%;
+  }
+  input:focus, select:focus, textarea:focus {
+    outline: none;
+    border-color: var(--blue);
+    box-shadow: 0 0 0 3px var(--blue-light);
+    background: #fff;
+  }
+  textarea { resize: vertical; min-height: 72px; }
+
+  .btn-primary {
+    margin-top: 20px;
+    width: 100%;
+    padding: 13px 24px;
+    background: var(--blue);
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    letter-spacing: 0.01em;
+    transition: background 0.18s, transform 0.1s;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+  }
+  .btn-primary:hover { background: var(--blue-dark); }
+  .btn-primary:active { transform: scale(0.99); }
+  .btn-primary:disabled { background: #a8c8ff; cursor: not-allowed; }
+
+  /* ── LOADER ── */
+  .loader-ring {
+    width: 18px; height: 18px;
+    border: 2.5px solid rgba(255,255,255,0.35);
+    border-top-color: #fff;
+    border-radius: 50%;
+    display: none;
+    animation: spin 0.7s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ── OUTPUT SECTION ── */
+  #output { display: none; }
+
+  .advice-banner {
+    background: linear-gradient(120deg, #0043ce, #0f62fe);
+    color: #fff;
+    border-radius: var(--radius);
+    padding: 22px 24px;
+    margin-bottom: 20px;
+    position: relative;
+    overflow: hidden;
+  }
+  .advice-banner::after {
+    content: '';
+    position: absolute;
+    right: -20px; top: -20px;
+    width: 110px; height: 110px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.07);
+  }
+  .advice-banner .greeting {
+    font-size: 13px;
+    opacity: 0.78;
+    margin-bottom: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+  .advice-banner .advice-text {
+    font-size: 15px;
+    line-height: 1.65;
+    font-weight: 400;
+  }
+
+  /* ── CARDS GRID ── */
+  .cards-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 20px;
+  }
+  .info-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 18px;
+  }
+  .info-card-header {
+    display: flex; align-items: center; gap: 8px;
+    margin-bottom: 12px;
+    font-size: 13px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+  .badge {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 30px; height: 30px;
+    border-radius: 6px;
+    font-size: 14px;
+    flex-shrink: 0;
+  }
+  .badge.blue   { background: var(--blue-light); color: var(--blue-dark); }
+  .badge.green  { background: var(--green-bg);   color: var(--green); }
+  .badge.orange { background: var(--orange-bg);  color: var(--orange); }
+
+  .info-card ul { list-style: none; display: flex; flex-direction: column; gap: 7px; }
+  .info-card ul li {
+    font-size: 13px;
+    color: var(--text);
+    padding-left: 14px;
+    position: relative;
+    line-height: 1.45;
+  }
+  .info-card ul li::before {
+    content: '›';
+    position: absolute; left: 0;
+    color: var(--blue);
+    font-weight: 700;
+  }
+
+  /* ── NEXT STEPS ── */
+  .steps-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 22px 24px; }
+  .steps-title { font-size: 14px; font-weight: 700; margin-bottom: 14px; color: var(--text); }
+  .steps-list { display: flex; flex-direction: column; gap: 10px; }
+  .step {
+    display: flex; gap: 12px; align-items: flex-start;
+  }
+  .step-num {
+    flex-shrink: 0;
+    width: 26px; height: 26px;
+    background: var(--blue);
+    color: #fff;
+    border-radius: 50%;
+    font-size: 11px;
+    font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .step-body { font-size: 13.5px; line-height: 1.5; padding-top: 3px; }
+  .step-body strong { color: var(--blue-dark); }
+
+  /* ── FOOTER ── */
+  footer {
+    text-align: center;
+    padding: 24px 16px;
+    font-size: 12px;
+    color: var(--muted);
+    border-top: 1px solid var(--border);
+  }
+  footer .powered {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 5px 14px;
+    margin-top: 8px;
+    font-weight: 600;
+    color: var(--blue-dark);
+    font-size: 12px;
+  }
+
+  /* ── ANIMATIONS ── */
+  .fade-in {
+    animation: fadeIn 0.45s ease both;
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 600px) {
+    .form-grid { grid-template-columns: 1fr; }
+    .cards-grid { grid-template-columns: 1fr; }
+    .card { padding: 20px 16px; }
+    .header-inner { padding: 22px 0 26px; }
+    .logo-text { font-size: 22px; }
+    .header-tagline { padding-left: 0; margin-top: 8px; }
+  }
+  @media (min-width: 601px) and (max-width: 720px) {
+    .cards-grid { grid-template-columns: 1fr 1fr; }
+  }
+</style>
+</head>
+<body>
+
+
+<header>
+  <div class="header-inner">
+    <div class="logo-row">
+      <div class="logo-icon">
+        <svg fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2z" fill="rgba(255,255,255,0.25)"></path>
+          <path d="M9 12l2 2 4-4" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+          <path d="M12 7v1M12 16v1M7 12h1M16 12h1" stroke="rgba(255,255,255,0.6)" stroke-width="1.5" stroke-linecap="round"></path>
+        </svg>
+      </div>
+      <div class="logo-text">AI Job Mentor <span>India</span></div>
+    </div>
+    <div class="header-tagline">Personalized career guidance for India's informal workforce — powered by AI</div>
+  </div>
+</header>
+
+
+<main>
+
+  
+  <div class="card" id="form-card">
+    <div class="card-title"><span class="dot"></span> Tell us about yourself</div>
+    <div class="form-grid">
+      <div class="form-group">
+        <label>Full Name</label>
+        <input type="text" id="name" />
+      </div>
+      <div class="form-group">
+        <label>Current Occupation</label>
+        <input type="text" id="occupation" />
+      </div>
+      <div class="form-group">
+        <label>Location</label>
+        <input type="text" id="location" />
+      </div>
+      <div class="form-group">
+        <label>Education Level</label>
+        <select id="education">
+          <option>Select level</option>
+          <option>No formal education</option>
+          <option>Primary (up to Class 5)</option>
+          <option>Middle school (Class 8)</option>
+          <option>Secondary (Class 10)</option>
+          <option>Higher Secondary (Class 12)</option>
+          <option>Diploma / ITI</option>
+          <option>Graduate</option>
+        </select>
+      </div>
+      <div class="form-group full">
+        <label>Skills &amp; Experience</label>
+        <textarea id="skills"></textarea>
+      </div>
+      <div class="form-group full">
+        <label>Career Goal</label>
+        <textarea id="goal"></textarea>
+      </div>
+    </div>
+    <button class="btn-primary" id="get-guidance-btn">
+      <div class="loader-ring" id="loader"></div>
+      <span id="btn-label">Get Guidance</span>
+    </button>
+  </div>
+
+  
+  <div id="output">
+
+    
+    <div class="advice-banner fade-in">
+      <div class="greeting" id="out-greeting">Career Guidance for You</div>
+      <div class="advice-text" id="out-advice"></div>
+    </div>
+
+    
+    <div class="cards-grid">
+      <div class="info-card fade-in" style="animation-delay:0.08s">
+        <div class="info-card-header">
+          <span class="badge blue">
+            <svg width="14" height="14" fill="currentColor"><path d="M10 2a8 8 0 100 16A8 8 0 0010 2zm1 11H9v-2h2v2zm0-4H9V6h2v3z"></path></svg>
+          </span>
+          <span style="color:#0043ce">Job Opportunities</span>
+        </div>
+        <ul id="out-jobs"></ul>
+      </div>
+
+      <div class="info-card fade-in" style="animation-delay:0.16s">
+        <div class="info-card-header">
+          <span class="badge green">
+            <svg width="14" height="14" fill="currentColor"><path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-.293.707L13 10.414V17a1 1 0 01-1.447.894l-4-2A1 1 0 017 15v-4.586L3.293 6.707A1 1 0 013 6V4z"></path></svg>
+          </span>
+          <span style="color:#198038">Govt. Schemes</span>
+        </div>
+        <ul id="out-schemes"></ul>
+      </div>
+
+      <div class="info-card fade-in" style="animation-delay:0.24s">
+        <div class="info-card-header">
+          <span class="badge orange">
+            <svg width="14" height="14" fill="currentColor"><path d="M10.394 2.08a1 1 0 00-.788 0l-7 3a1 1 0 000 1.84L5 8.13V11a1 1 0 00.553.894l4 2a1 1 0 00.894 0l4-2A1 1 0 0015 11V8.13l2-0.858V13a1 1 0 102 0V6a1 1 0 00-.606-.92l-8-3.44z"></path></svg>
+          </span>
+          <span style="color:#b45309">Skill Training</span>
+        </div>
+        <ul id="out-skills"></ul>
+      </div>
+    </div>
+
+    
+    <div class="steps-card fade-in" style="animation-delay:0.32s">
+      <div class="steps-title">Your Personalised Action Plan</div>
+      <div class="steps-list" id="out-steps"></div>
+    </div>
+
+  </div>
+
+</main>
+
+
+<footer>
+  <div>AI Job Mentor © 2025 — Helping India's informal workforce grow</div>
+  <div class="powered">
+    <svg width="14" height="14" fill="#0f62fe"><rect x="0" y="4" width="32" height="4"></rect><rect x="0" y="12" width="32" height="4"></rect><rect x="0" y="20" width="32" height="4"></rect><rect x="0" y="28" width="32" height="4"></rect></svg>
+    Powered by IBM Watsonx &amp; Granite
+  </div>
+</footer>
+
+
+
+<p style="text-align:center;margin:12px 0 0;font-size:11px;color:#aaa;border-top:1px solid #e5e7eb;padding-top:12px">Made with IBM Bob</p>
+</body>
+</html>
