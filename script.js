@@ -21,7 +21,7 @@
     btnLabel.textContent = 'Analysing...';
 
     try {
-      const response = await fetch('http://localhost:3000/api/guidance', {
+      const response = await fetch('/api/guidance', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name, occupation, location, education, skills, goal })
