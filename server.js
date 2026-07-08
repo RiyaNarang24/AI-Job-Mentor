@@ -70,7 +70,7 @@ Respond in simple, easy-to-understand language.`;
     }
   ],
   parameters: {
-    max_new_tokens: 800,
+    max_new_tokens: 500,
     temperature: 0.7
   },
   project_id: process.env.IBM_PROJECT_ID
